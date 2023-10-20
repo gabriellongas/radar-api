@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Radar.Api.Data;
+using System.Text.Json;
 
 namespace Radar.Api.Controllers
 {
@@ -7,19 +9,21 @@ namespace Radar.Api.Controllers
     public class LoginController : ControllerBase
     {
         private readonly ILogger<LoginController> _logger;
+        private readonly IPessoaRepository _pessoaRepository;
 
-        public LoginController(ILogger<LoginController> logger, IConfiguration configuration)
+        public LoginController(ILogger<LoginController> logger, IConfiguration configuration, IPessoaRepository pessoaRepository)
         {
             _logger = logger;
-
-        }
+            _pessoaRepository = pessoaRepository
+;        }
 
         [HttpGet(Name = "Login")]
-        public async Task<IActionResult> Login(string user, string senha)
+        public async Task<IActionResult> Login()
         {
             try
             {
-                return Ok();
+                var lista = _pessoaRepository.ListarPessoas();
+                return Ok(JsonSerializer.Serialize(lista));
             }
             catch (Exception ex)
             {
