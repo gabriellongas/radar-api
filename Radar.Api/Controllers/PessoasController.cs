@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Radar.Api.Data;
 using Radar.Api.Models;
 
 namespace Radar.Api.Controllers
@@ -23,23 +24,23 @@ namespace Radar.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Pessoa>>> GetPessoa()
         {
-            if (_context.Pessoa == null)
+            if (_context.Pessoas == null)
             {
                 return NotFound();
             }
 
-            return await _context.Pessoa.ToListAsync();
+            return await _context.Pessoas.ToListAsync();
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Pessoa>> GetPessoa(int id)
         {
-            if (_context.Pessoa == null)
+            if (_context.Pessoas == null)
             {
                 return NotFound();
             }
 
-            var pessoa = await _context.Pessoa.FindAsync(id);
+            var pessoa = await _context.Pessoas.FindAsync(id);
 
             if (pessoa == null)
             {
@@ -52,7 +53,7 @@ namespace Radar.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPessoa(int id, Pessoa pessoa)
         {
-            if (id != pessoa.PessoaID)
+            if (id != pessoa.PessoaId)
             {
                 return BadRequest();
             }
@@ -81,33 +82,33 @@ namespace Radar.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Pessoa>> PostPessoa(Pessoa pessoa)
         {
-            if (_context.Pessoa == null)
+            if (_context.Pessoas == null)
             {
                 return Problem("Entity set 'RadarContext.Pessoa'  is null.");
             }
 
-            _context.Pessoa.Add(pessoa);
+            _context.Pessoas.Add(pessoa);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPessoa", new { id = pessoa.PessoaID }, pessoa);
+            return CreatedAtAction("GetPessoa", new { id = pessoa.PessoaId }, pessoa);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePessoa(int id)
         {
-            if (_context.Pessoa == null)
+            if (_context.Pessoas == null)
             {
                 return NotFound();
             }
-            
-            var pessoa = await _context.Pessoa.FindAsync(id);
-            
+
+            var pessoa = await _context.Pessoas.FindAsync(id);
+
             if (pessoa == null)
             {
                 return NotFound();
             }
 
-            _context.Pessoa.Remove(pessoa);
+            _context.Pessoas.Remove(pessoa);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -115,7 +116,7 @@ namespace Radar.Api.Controllers
 
         private bool PessoaExists(int id)
         {
-            return (_context.Pessoa?.Any(e => e.PessoaID == id)).GetValueOrDefault();
+            return (_context.Pessoas?.Any(e => e.PessoaId == id)).GetValueOrDefault();
         }
     }
 }
