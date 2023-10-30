@@ -1,16 +1,26 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Radar.Api.Models
+namespace Radar.Api.Models;
+
+public partial class Post
 {
-    public class Post
-    {
-        [Key] public int PostID { get; set; }
-        [ForeignKey("PessoaID")] public Pessoa Pessoa { get; set; } = new();
-        [ForeignKey("LocalID)")] public Local Local { get; set; } = new();
-        public string? Conteudo { get; set; }
-        public int Avaliacao { get; set; }
-        public DateTimeOffset DataPostagem { get; set; }
-        public int Likes { get; set; }
-    }
+    public int PostId { get; set; }
+
+    public int? PessoaId { get; set; }
+
+    public int? LocalId { get; set; }
+
+    public string? Conteudo { get; set; }
+
+    public int? Avaliacao { get; set; }
+
+    public DateTime? DataPostagem { get; set; }
+
+    public int? Likes { get; set; }
+
+    public virtual Local? Local { get; set; }
+
+    public virtual Pessoa? Pessoa { get; set; }
 }

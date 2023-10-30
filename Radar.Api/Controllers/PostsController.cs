@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Radar.Api.Data;
 using Radar.Api.Models;
 
 namespace Radar.Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class PostsController : ControllerBase
     {
         private readonly RadarContext _context;
@@ -18,23 +19,23 @@ namespace Radar.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Post>>> GetPost()
         {
-            if (_context.Post == null)
+            if (_context.Posts == null)
             {
                 return NotFound();
             }
 
-            return await _context.Post.ToListAsync();
+            return await _context.Posts.ToListAsync();
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Post>> GetPost(int id)
         {
-            if (_context.Post == null)
+            if (_context.Posts == null)
             {
                 return NotFound();
             }
 
-            var post = await _context.Post.FindAsync(id);
+            var post = await _context.Posts.FindAsync(id);
 
             if (post == null)
             {
@@ -47,7 +48,7 @@ namespace Radar.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPost(int id, Post post)
         {
-            if (id != post.PostID)
+            if (id != post.PostId)
             {
                 return BadRequest();
             }
@@ -76,30 +77,30 @@ namespace Radar.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Post>> PostPost(Post post)
         {
-            if (_context.Post == null)
+            if (_context.Posts == null)
             {
                 return Problem("Entity set 'RadarContext.Post'  is null.");
             }
-            _context.Post.Add(post);
+            _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPost", new { id = post.PostID }, post);
+            return CreatedAtAction("GetPost", new { id = post.PostId }, post);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(int id)
         {
-            if (_context.Post == null)
+            if (_context.Posts == null)
             {
                 return NotFound();
             }
-            var post = await _context.Post.FindAsync(id);
+            var post = await _context.Posts.FindAsync(id);
             if (post == null)
             {
                 return NotFound();
             }
 
-            _context.Post.Remove(post);
+            _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -107,7 +108,7 @@ namespace Radar.Api.Controllers
 
         private bool PostExists(int id)
         {
-            return (_context.Post?.Any(e => e.PostID == id)).GetValueOrDefault();
+            return (_context.Posts?.Any(e => e.PostId == id)).GetValueOrDefault();
         }
     }
 }

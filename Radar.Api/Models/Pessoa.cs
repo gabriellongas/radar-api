@@ -1,12 +1,27 @@
-﻿namespace Radar.Api.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace Radar.Api.Models;
+
+public partial class Pessoa
 {
-    public class Pessoa
-    {
-        public int PessoaID { get; set; }
-        public string Nome { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Login { get; set; } = string.Empty;
-        public string Senha { get; set; } = string.Empty;
-        public DateTimeOffset DataNascimento { get; set; }
-    }
+    public int PessoaId { get; set; }
+
+    public string? Nome { get; set; }
+
+    public string? Email { get; set; }
+
+    public string? Login { get; set; }
+
+    public string? Senha { get; set; }
+
+    public string? Descricao { get; set; }
+
+    public DateTime? DataNascimento { get; set; }
+
+    public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
+
+    public virtual ICollection<Seguidore> SeguidorePessoaIdseguidaNavigations { get; set; } = new List<Seguidore>();
+
+    public virtual ICollection<Seguidore> SeguidorePessoaIdseguidorNavigations { get; set; } = new List<Seguidore>();
 }
