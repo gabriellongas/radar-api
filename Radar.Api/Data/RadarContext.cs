@@ -8,6 +8,14 @@ namespace Radar.Api.Data;
 
 public partial class RadarContext : DbContext
 {
+
+    private IConfiguration _configuration;
+
+    public RadarContext(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
     public virtual DbSet<Local> Locals { get; set; }
 
     public virtual DbSet<Pessoa> Pessoas { get; set; }
@@ -17,7 +25,7 @@ public partial class RadarContext : DbContext
     public virtual DbSet<Seguidore> Seguidores { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Server=tcp:radar-dev-sql-server.database.windows.net,1433;Initial Catalog=radar-dev-database;Persist Security Info=False;User ID=radar-admin;Password=R@dar123;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+        => optionsBuilder.UseSqlServer(_configuration.GetValue<string>("ConnectionStrings:SqlConnection"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

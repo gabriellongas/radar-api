@@ -21,6 +21,14 @@ namespace Radar.Api.Controllers
             _context = context;
         }
 
+
+        [HttpGet]
+        [Route("GetConnectionString")]
+        public async Task<String> GetConnectionString()
+        {
+            return "teste";
+        }
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Local>>> GetLocal()
         {
