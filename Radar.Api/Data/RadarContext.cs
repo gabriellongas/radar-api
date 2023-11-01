@@ -20,7 +20,7 @@ public partial class RadarContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer("Server=tcp:radar-dev-sql-server.database.windows.net,1433;Initial Catalog=radar-dev-database;Persist Security Info=False;User ID=radar-admin;Password=R@dar123;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+        optionsBuilder.UseSqlServer("Server=db-radar-hml.database.windows.net,1433;Initial Catalog=Radar_DB_HML;Persist Security Info=False;User ID=user_database_console;Password=R@dar123;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
         optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
     }
 
