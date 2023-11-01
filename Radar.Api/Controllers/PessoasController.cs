@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Radar.Api.Data;
-using Radar.Api.Models;
+using Radar.Api.Models.Dto;
 
 namespace Radar.Api.Controllers
 {
@@ -22,18 +17,19 @@ namespace Radar.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Pessoa>>> GetPessoa()
+        public async Task<ActionResult<IEnumerable<PessoaReadDto>>> GetPessoa()
         {
             if (_context.Pessoas == null)
             {
                 return NotFound();
             }
 
-            return await _context.Pessoas.ToListAsync();
+            List<Pessoa> pessoas = await _context.Pessoas.ToListAsync();
+            return Ok(pessoas.ToReadDto());
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Pessoa>> GetPessoa(int id)
+        public async Task<ActionResult<PessoaReadDto>> GetPessoa(int id)
         {
             if (_context.Pessoas == null)
             {
@@ -47,18 +43,18 @@ namespace Radar.Api.Controllers
                 return NotFound();
             }
 
-            return pessoa;
+            return Ok(pessoa.ToReadDto());
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPessoa(int id, Pessoa pessoa)
+        public async Task<IActionResult> PutPessoa(int id, PessoaCreateDto pessoa)
         {
             if (id != pessoa.PessoaId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(pessoa).State = EntityState.Modified;
+            _context.Entry(pessoa.ToModel()).State = EntityState.Modified;
 
             try
             {
@@ -80,14 +76,14 @@ namespace Radar.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Pessoa>> PostPessoa(Pessoa pessoa)
+        public async Task<ActionResult<Pessoa>> PostPessoa(PessoaCreateDto pessoa)
         {
             if (_context.Pessoas == null)
             {
                 return Problem("Entity set 'RadarContext.Pessoa'  is null.");
             }
 
-            _context.Pessoas.Add(pessoa);
+            _context.Pessoas.Add(pessoa.ToModel());
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPessoa", new { id = pessoa.PessoaId }, pessoa);
