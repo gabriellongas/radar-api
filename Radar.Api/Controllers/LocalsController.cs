@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Radar.Api.Data;
 using Radar.Api.Models;
+using Radar.Api.Models.Dto;
 
 namespace Radar.Api.Controllers
 {
@@ -22,18 +18,19 @@ namespace Radar.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Local>>> GetLocal()
+        public async Task<ActionResult<IEnumerable<LocalReadDto>>> GetLocal()
         {
             if (_context.Locals == null)
             {
                 return NotFound();
             }
 
-            return await _context.Locals.ToListAsync();
+            List<Local> locals = await _context.Locals.ToListAsync();
+            return Ok(locals.ToReadDto());
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Local>> GetLocal(int id)
+        public async Task<ActionResult<LocalReadDto>> GetLocal(int id)
         {
             if (_context.Locals == null)
             {
@@ -47,18 +44,18 @@ namespace Radar.Api.Controllers
                 return NotFound();
             }
 
-            return local;
+            return Ok(local.ToReadDto());
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutLocal(int id, Local local)
+        public async Task<IActionResult> PutLocal(int id, LocalCreateDto local)
         {
             if (id != local.LocalId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(local).State = EntityState.Modified;
+            _context.Entry(local.ToModel()).State = EntityState.Modified;
 
             try
             {
@@ -80,14 +77,14 @@ namespace Radar.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Local>> PostLocal(Local local)
+        public async Task<ActionResult<Local>> PostLocal(LocalCreateDto local)
         {
             if (_context.Locals == null)
             {
                 return Problem("Entity set 'RadarContext.Local'  is null.");
             }
 
-            _context.Locals.Add(local);
+            _context.Locals.Add(local.ToModel());
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetLocal", new { id = local.LocalId }, local);

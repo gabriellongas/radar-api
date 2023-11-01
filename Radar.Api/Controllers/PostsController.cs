@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Radar.Api.Data;
-using Radar.Api.Models;
+using Radar.Api.Models.Dto;
 
 namespace Radar.Api.Controllers
 {
@@ -17,18 +17,19 @@ namespace Radar.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPost()
+        public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPost()
         {
             if (_context.Posts == null)
             {
                 return NotFound();
             }
 
-            return await _context.Posts.ToListAsync();
+            List<Post> posts = await _context.Posts.ToListAsync();
+            return Ok(posts.ToReadDto(_context));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Post>> GetPost(int id)
+        public async Task<ActionResult<PostReadDto>> GetPost(int id)
         {
             if (_context.Posts == null)
             {
@@ -42,7 +43,7 @@ namespace Radar.Api.Controllers
                 return NotFound();
             }
 
-            return post;
+            return Ok(post.ToReadDto(_context));
         }
 
         [HttpPut("{id}")]
@@ -75,13 +76,24 @@ namespace Radar.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Post>> PostPost(Post post)
+        public async Task<ActionResult<Post>> PostPost(PostCreateDto post)
         {
             if (_context.Posts == null)
             {
                 return Problem("Entity set 'RadarContext.Post'  is null.");
             }
-            _context.Posts.Add(post);
+
+            if (!_context.Pessoas.AnyAsync(pessoa => pessoa.PessoaId == post.PessoaId).Result)
+            {
+                return Problem("Entity set 'RadarContext.Pessoa' does not contain the specified key.");
+            }
+
+            if (!_context.Locals.AnyAsync(local => local.LocalId == post.LocalId).Result)
+            {
+                return Problem("Entity set 'RadarContext.Local' does not contain the specified key.");
+            }
+
+            _context.Posts.Add(post.ToModel(_context));
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPost", new { id = post.PostId }, post);
@@ -104,6 +116,24 @@ namespace Radar.Api.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpGet("FromPessoa/{pessoaId}")]
+        public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPostFromPessoa(int pessoaId)
+        {
+            if (_context.Posts == null)
+            {
+                return NotFound();
+            }
+
+            List<Post> posts = await _context.Posts.Where(post => post.PessoaId == pessoaId).ToListAsync();
+
+            if (posts.Count == 0)
+            {
+                return NotFound();
+            }
+
+            return Ok(posts.ToReadDto(_context));
         }
 
         private bool PostExists(int id)
