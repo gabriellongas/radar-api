@@ -1,12 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Radar.Api.Data;
 
 public partial class RadarContext : DbContext
 {
-    public RadarContext() { }
+    private IConfiguration _configuration;
 
-    public RadarContext(DbContextOptions<RadarContext> options) : base(options) { }
+    public RadarContext(DbContextOptions<RadarContext> options, IConfiguration configuration) : base(options) {
+        _configuration = configuration;
+    }
 
     public virtual DbSet<Curtidas> Curtida { get; set; }
 
@@ -20,7 +25,7 @@ public partial class RadarContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer("Server=db-radar-hml.database.windows.net,1433;Initial Catalog=Radar_DB_HML;Persist Security Info=False;User ID=user_database_console;Password=R@dar123;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+        optionsBuilder.UseSqlServer(_configuration.GetValue<string>("ConnectionStrings:SqlConnection"));
         optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
     }
 

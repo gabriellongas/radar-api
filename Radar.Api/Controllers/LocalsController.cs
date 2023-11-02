@@ -11,10 +11,20 @@ namespace Radar.Api.Controllers
     public class LocalsController : ControllerBase
     {
         private readonly RadarContext _context;
+        private readonly IConfiguration _configuration;
 
-        public LocalsController(RadarContext context)
+        public LocalsController(RadarContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
+        }
+
+
+        [HttpGet]
+        [Route("GetConnectionString")]
+        public String GetConnectionString()
+        {
+            return _configuration.GetValue<string>("ConnectionStrings:SqlConnection");
         }
 
         [HttpGet]
