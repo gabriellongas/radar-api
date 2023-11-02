@@ -83,6 +83,8 @@ namespace Radar.Api.Controllers
                 return Problem("Entity set 'RadarContext.Pessoa'  is null.");
             }
 
+            pessoa.PessoaId = GetNextId();
+
             _context.Pessoas.Add(pessoa.ToModel());
             await _context.SaveChangesAsync();
 
@@ -113,6 +115,11 @@ namespace Radar.Api.Controllers
         private bool PessoaExists(int id)
         {
             return (_context.Pessoas?.Any(e => e.PessoaId == id)).GetValueOrDefault();
+        }
+
+        private int GetNextId()
+        {
+            return (_context.Pessoas?.Max(e => e.PessoaId) ?? 0) + 1;
         }
     }
 }
