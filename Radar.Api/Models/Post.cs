@@ -1,26 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Radar.Api.Models;
 
-public partial class Post
+[Table("Post")]
+public class Post
 {
+    #region Column
+    [Key]
+    [Column("PostID")]
     public int PostId { get; set; }
 
-    public int? PessoaId { get; set; }
+    [Column("PessoaID")]
+    public int PessoaId { get; set; }
 
-    public int? LocalId { get; set; }
+    [Column("LocalID")]
+    public int LocalId { get; set; }
 
-    public string? Conteudo { get; set; }
+    [Column(TypeName = "text")]
+    public string Conteudo { get; set; } = null!;
 
-    public int? Avaliacao { get; set; }
+    public int Avaliacao { get; set; }
 
-    public DateTime? DataPostagem { get; set; }
+    [Column(TypeName = "datetime")]
+    public DateTime DataPostagem { get; set; }
 
-    public int? Likes { get; set; }
+    public int Likes { get; set; }
+    #endregion Column
 
-    public virtual Local? Local { get; set; }
+    #region Relationship
+    [InverseProperty("PostIdCurtidoNavigation")]
+    [JsonIgnore]
+    public virtual ICollection<Curtidas> Curtidas { get; set; } = new List<Curtidas>();
 
-    public virtual Pessoa? Pessoa { get; set; }
+    [ForeignKey("LocalId")]
+    [InverseProperty("Posts")]
+    public virtual Local Local { get; set; } = null!;
+
+    [ForeignKey("PessoaId")]
+    [InverseProperty("Posts")]
+    public virtual Pessoa Pessoa { get; set; } = null!;
+    #endregion Relationship
 }

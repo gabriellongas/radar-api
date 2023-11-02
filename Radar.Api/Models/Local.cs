@@ -1,19 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 
 namespace Radar.Api.Models;
 
-public partial class Local
+[Table("Local")]
+public class Local
 {
+    #region Column
+    [Key]
+    [Column("LocalID")]
     public int LocalId { get; set; }
 
-    public string? Nome { get; set; }
+    [StringLength(255)]
+    [Unicode(false)]
+    public string Nome { get; set; } = null!;
 
-    public string? Descricao { get; set; }
+    [Column(TypeName = "text")]
+    public string Descricao { get; set; } = null!;
 
-    public string? Endereco { get; set; }
+    [StringLength(255)]
+    [Unicode(false)]
+    public string Endereco { get; set; } = null!;
 
-    public string? Verificado { get; set; }
+    [StringLength(14)]
+    [Unicode(false)]
+    public string Verificado { get; set; } = null!;
+    #endregion Column
 
+    #region Relationship
+    [InverseProperty("Local")]
+    [JsonIgnore]
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
+    #endregion Relationship
 }
