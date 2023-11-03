@@ -1,5 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Radar.Api.Data;
 using Radar.Api.Models.Dto;
 
@@ -47,14 +52,16 @@ namespace Radar.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPessoa(int id, PessoaCreateDto pessoa)
+        public async Task<IActionResult> PutPessoa(int id, PessoaUpdateDto pessoa)
         {
             if (id != pessoa.PessoaId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(pessoa.ToModel()).State = EntityState.Modified;
+            Dictionary<string, string> hmac = GetHmacFromPassword(pessoa.Senha);
+
+            _context.Entry(pessoa.ToModel(hmac["Hash"], hmac["Key"])).State = EntityState.Modified;
 
             try
             {
@@ -83,12 +90,14 @@ namespace Radar.Api.Controllers
                 return Problem("Entity set 'RadarContext.Pessoa'  is null.");
             }
 
-            pessoa.PessoaId = GetNextId();
+            int newId = GetNextId();
 
-            _context.Pessoas.Add(pessoa.ToModel());
+            Dictionary<string, string> hmac = GetHmacFromPassword(pessoa.Senha);
+
+            _context.Pessoas.Add(pessoa.ToModel(newId, hmac["Hash"], hmac["Key"]));
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPessoa", new { id = pessoa.PessoaId }, pessoa);
+            return CreatedAtAction("GetPessoa", new { id = newId }, pessoa);
         }
 
         [HttpDelete("{id}")]
@@ -99,7 +108,7 @@ namespace Radar.Api.Controllers
                 return NotFound();
             }
 
-            var pessoa = await _context.Pessoas.FindAsync(id);
+            Pessoa? pessoa = await _context.Pessoas.FindAsync(id);
 
             if (pessoa == null)
             {
@@ -112,6 +121,30 @@ namespace Radar.Api.Controllers
             return NoContent();
         }
 
+        [HttpPost("SignIn")]
+        public async Task<IActionResult> SignIn(PessoaLoginDto login)
+        {
+            if (_context.Pessoas == null)
+            {
+                return NotFound();
+            }
+
+            if (!await _context.Pessoas.AnyAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))
+            {
+                return base.NotFound();
+            }
+
+            Pessoa pessoa = (await _context.Pessoas.FirstOrDefaultAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))!;
+            if (!IsPasswordValid(login.Senha, pessoa.SenhaHash, pessoa.SenhaKey))
+            {
+                return Unauthorized();
+            }
+
+            string token = CreateToken(pessoa);
+
+            return Ok(token);
+        }
+
         private bool PessoaExists(int id)
         {
             return (_context.Pessoas?.Any(e => e.PessoaId == id)).GetValueOrDefault();
@@ -120,6 +153,49 @@ namespace Radar.Api.Controllers
         private int GetNextId()
         {
             return (_context.Pessoas?.Max(e => e.PessoaId) ?? 0) + 1;
+        }
+
+        private static Dictionary<string, string> GetHmacFromPassword(string password)
+        {
+            using HMACSHA512 hmac = new();
+
+            return new Dictionary<string, string> {
+                { "Hash", Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(password))) },
+                { "Key", Convert.ToBase64String(hmac.Key) }
+            };
+        }
+
+        private static bool IsPasswordValid(string password, string hmac512hash, string hmac512key)
+        {
+            using HMACSHA512 hmac = new(Convert.FromBase64String(hmac512key));
+
+            return hmac512hash == Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(password)));
+        }
+
+        private string CreateToken(Pessoa login)
+        {
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, login.Nome),
+                new Claim(ClaimTypes.Email, login.Email),
+                new Claim(ClaimTypes.NameIdentifier, login.PessoaId.ToString())
+            };
+
+            byte[] rawKey = Encoding.UTF8.GetBytes(_context.Configuration["Jwt:Key"]!);
+            byte[] key = new byte[16];
+            Array.Copy(rawKey, key, Math.Min(rawKey.Length, key.Length));
+
+            SymmetricSecurityKey symetricKey = new(key);
+            SigningCredentials credentials = new(symetricKey, SecurityAlgorithms.HmacSha512Signature);
+            JwtSecurityToken jwt = new(
+                claims: claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: credentials
+            );
+
+            string token = new JwtSecurityTokenHandler().WriteToken(jwt);
+
+            return token;
         }
     }
 }

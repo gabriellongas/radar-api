@@ -26,9 +26,13 @@ public class Pessoa
     [Unicode(false)]
     public string Login { get; set; } = null!;
 
-    [StringLength(255)]
+    [StringLength(512)]
     [Unicode(false)]
-    public string Senha { get; set; } = null!;
+    public string SenhaKey { get; set; } = null!;
+
+    [StringLength(512)]
+    [Unicode(false)]
+    public string SenhaHash { get; set; } = null!;
 
     [StringLength(255)]
     [Unicode(false)]

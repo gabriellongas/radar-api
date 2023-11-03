@@ -54,7 +54,22 @@ namespace Radar.Api.Models.Dto
         #endregion Local
 
         #region Pessoa
-        public static Pessoa ToModel(this PessoaCreateDto pessoaDto)
+        public static Pessoa ToModel(this PessoaCreateDto pessoaDto, int id, string hash, string key)
+        {
+            return new()
+            {
+                PessoaId = id,
+                Nome = pessoaDto.Nome,
+                Email = pessoaDto.Email,
+                Login = pessoaDto.Login,
+                SenhaHash = hash,
+                SenhaKey = key,
+                Descricao = pessoaDto.Descricao,
+                DataNascimento = pessoaDto.DataNascimento
+            };
+        }
+
+        public static Pessoa ToModel(this PessoaUpdateDto pessoaDto, string hash, string key)
         {
             return new()
             {
@@ -62,7 +77,8 @@ namespace Radar.Api.Models.Dto
                 Nome = pessoaDto.Nome,
                 Email = pessoaDto.Email,
                 Login = pessoaDto.Login,
-                Senha = pessoaDto.Senha,
+                SenhaHash = hash,
+                SenhaKey = key,
                 Descricao = pessoaDto.Descricao,
                 DataNascimento = pessoaDto.DataNascimento
             };
@@ -76,7 +92,8 @@ namespace Radar.Api.Models.Dto
                 Nome = pessoa.Nome,
                 Email = pessoa.Email,
                 Login = pessoa.Login,
-                Senha = pessoa.Senha,
+                SenhaHash = pessoa.SenhaHash,
+                SenhaKey = pessoa.SenhaKey,
                 Descricao = pessoa.Descricao,
                 DataNascimento = pessoa.DataNascimento
             };
@@ -94,7 +111,8 @@ namespace Radar.Api.Models.Dto
                     Nome = pessoa.Nome,
                     Email = pessoa.Email,
                     Login = pessoa.Login,
-                    Senha = pessoa.Senha,
+                    SenhaHash = pessoa.SenhaHash,
+                    SenhaKey = pessoa.SenhaKey,
                     Descricao = pessoa.Descricao,
                     DataNascimento = pessoa.DataNascimento
                 };
