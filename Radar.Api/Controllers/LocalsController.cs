@@ -19,14 +19,6 @@ namespace Radar.Api.Controllers
             _configuration = configuration;
         }
 
-
-        [HttpGet]
-        [Route("GetConnectionString")]
-        public String GetConnectionString()
-        {
-            return _configuration.GetValue<string>("ConnectionStrings:SqlConnection");
-        }
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LocalReadDto>>> GetLocal()
         {
