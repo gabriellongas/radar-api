@@ -93,6 +93,8 @@ namespace Radar.Api.Controllers
                 return Problem("Entity set 'RadarContext.Local' does not contain the specified key.");
             }
 
+            post.PostId = GetNextId();
+
             _context.Posts.Add(post.ToModel(_context));
             await _context.SaveChangesAsync();
 
@@ -139,6 +141,11 @@ namespace Radar.Api.Controllers
         private bool PostExists(int id)
         {
             return (_context.Posts?.Any(e => e.PostId == id)).GetValueOrDefault();
+        }
+
+        private int GetNextId()
+        {
+            return (_context.Posts?.Max(e => e.PostId) ?? 0) + 1;
         }
     }
 }

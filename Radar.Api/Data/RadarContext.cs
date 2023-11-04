@@ -7,10 +7,10 @@ namespace Radar.Api.Data;
 
 public partial class RadarContext : DbContext
 {
-    private IConfiguration _configuration;
+    internal IConfiguration Configuration;
 
     public RadarContext(DbContextOptions<RadarContext> options, IConfiguration configuration) : base(options) {
-        _configuration = configuration;
+        this.Configuration = configuration;
     }
 
     public virtual DbSet<Curtidas> Curtida { get; set; }
@@ -25,7 +25,7 @@ public partial class RadarContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer(_configuration.GetValue<string>("ConnectionStrings:SqlConnection"));
+        optionsBuilder.UseSqlServer(Configuration.GetValue<string>("ConnectionStrings:SqlConnection"));
         optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
     }
 

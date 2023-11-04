@@ -94,6 +94,8 @@ namespace Radar.Api.Controllers
                 return Problem("Entity set 'RadarContext.Local'  is null.");
             }
 
+            local.LocalId = GetNextId();
+
             _context.Locals.Add(local.ToModel());
             await _context.SaveChangesAsync();
 
@@ -122,6 +124,11 @@ namespace Radar.Api.Controllers
         private bool LocalExists(int id)
         {
             return (_context.Locals?.Any(e => e.LocalId == id)).GetValueOrDefault();
+        }
+
+        private int GetNextId()
+        {
+            return (_context.Locals?.Max(e => e.LocalId) ?? 0) + 1;
         }
     }
 }
