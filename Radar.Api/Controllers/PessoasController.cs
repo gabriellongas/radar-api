@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -12,6 +13,7 @@ namespace Radar.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PessoasController : ControllerBase
     {
         private readonly RadarContext _context;
@@ -122,6 +124,7 @@ namespace Radar.Api.Controllers
         }
 
         [HttpPost("SignIn")]
+        [AllowAnonymous]
         public async Task<IActionResult> SignIn(PessoaLoginDto login)
         {
             if (_context.Pessoas == null)
