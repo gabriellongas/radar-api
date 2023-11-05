@@ -13,15 +13,15 @@ public partial class RadarContext : DbContext
         this.Configuration = configuration;
     }
 
-    public virtual DbSet<Curtidas> Curtida { get; set; }
+    public virtual DbSet<Curtida> Curtida { get; set; }
 
-    public virtual DbSet<Local> Locals { get; set; }
+    public virtual DbSet<Local> Local { get; set; }
 
-    public virtual DbSet<Pessoa> Pessoas { get; set; }
+    public virtual DbSet<Pessoa> Pessoa { get; set; }
 
-    public virtual DbSet<Post> Posts { get; set; }
+    public virtual DbSet<Post> Post { get; set; }
 
-    public virtual DbSet<Seguidores> Seguidores { get; set; }
+    public virtual DbSet<Seguidor> Seguidor { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -31,7 +31,7 @@ public partial class RadarContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Curtidas>(entity =>
+        modelBuilder.Entity<Curtida>(entity =>
         {
             entity.HasKey(e => e.CurtidaId).HasName("PK__Curtida__3D5455C4619058F5");
 
@@ -68,7 +68,7 @@ public partial class RadarContext : DbContext
             entity.HasOne(d => d.Pessoa).WithMany(p => p.Posts).HasConstraintName("FK__Post__PessoaID__6754599E");
         });
 
-        modelBuilder.Entity<Seguidores>(entity =>
+        modelBuilder.Entity<Seguidor>(entity =>
         {
             entity.HasKey(e => e.SeguidorId).HasName("PK__Seguidor__EAE128AFA2CC30E4");
 

@@ -8,12 +8,12 @@ namespace Radar.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LocalsController : ControllerBase
+    public class LocalController : ControllerBase
     {
         private readonly RadarContext _context;
         private readonly IConfiguration _configuration;
 
-        public LocalsController(RadarContext context, IConfiguration configuration)
+        public LocalController(RadarContext context, IConfiguration configuration)
         {
             _context = context;
             _configuration = configuration;
@@ -22,24 +22,24 @@ namespace Radar.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LocalReadDto>>> GetLocal()
         {
-            if (_context.Locals == null)
+            if (_context.Local == null)
             {
                 return NotFound();
             }
 
-            List<Local> locals = await _context.Locals.ToListAsync();
+            List<Local> locals = await _context.Local.ToListAsync();
             return Ok(locals.ToReadDto());
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<LocalReadDto>> GetLocal(int id)
         {
-            if (_context.Locals == null)
+            if (_context.Local == null)
             {
                 return NotFound();
             }
 
-            var local = await _context.Locals.FindAsync(id);
+            var local = await _context.Local.FindAsync(id);
 
             if (local == null)
             {
@@ -63,7 +63,7 @@ namespace Radar.Api.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateException)
             {
                 if (!LocalExists(id))
                 {
@@ -81,14 +81,14 @@ namespace Radar.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Local>> PostLocal(LocalCreateDto local)
         {
-            if (_context.Locals == null)
+            if (_context.Local == null)
             {
                 return Problem("Entity set 'RadarContext.Local'  is null.");
             }
 
             local.LocalId = GetNextId();
 
-            _context.Locals.Add(local.ToModel());
+            _context.Local.Add(local.ToModel());
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetLocal", new { id = local.LocalId }, local);
@@ -97,17 +97,17 @@ namespace Radar.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLocal(int id)
         {
-            if (_context.Locals == null)
+            if (_context.Local == null)
             {
                 return NotFound();
             }
-            var local = await _context.Locals.FindAsync(id);
+            var local = await _context.Local.FindAsync(id);
             if (local == null)
             {
                 return NotFound();
             }
 
-            _context.Locals.Remove(local);
+            _context.Local.Remove(local);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -115,12 +115,12 @@ namespace Radar.Api.Controllers
 
         private bool LocalExists(int id)
         {
-            return (_context.Locals?.Any(e => e.LocalId == id)).GetValueOrDefault();
+            return (_context.Local?.Any(e => e.LocalId == id)).GetValueOrDefault();
         }
 
         private int GetNextId()
         {
-            return (_context.Locals?.Max(e => e.LocalId) ?? 0) + 1;
+            return (_context.Local?.Max(e => e.LocalId) ?? 0) + 1;
         }
     }
 }
