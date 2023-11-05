@@ -45,7 +45,7 @@ public class Pessoa
     #region Relationship
     [InverseProperty("PessoaIdCurtindoNavigation")]
     [JsonIgnore]
-    public virtual ICollection<Curtidas> Curtidas { get; set; } = new List<Curtidas>();
+    public virtual ICollection<Curtida> Curtidas { get; set; } = new List<Curtida>();
 
     [InverseProperty("Pessoa")]
     [JsonIgnore]
@@ -53,10 +53,10 @@ public class Pessoa
 
     [InverseProperty("PessoaIdSeguidaNavigation")]
     [JsonIgnore]
-    public virtual ICollection<Seguidores> SeguidoresPessoaIdSeguidaNavigation { get; set; } = new List<Seguidores>();
+    public virtual ICollection<Seguidor> SeguidoresPessoaIdSeguidaNavigation { get; set; } = new List<Seguidor>();
 
     [InverseProperty("PessoaIdSeguidorNavigation")]
     [JsonIgnore]
-    public virtual ICollection<Seguidores> SeguidoresPessoaIdSeguidorNavigation { get; set; } = new List<Seguidores>();
+    public virtual ICollection<Seguidor> SeguidoresPessoaIdSeguidorNavigation { get; set; } = new List<Seguidor>();
     #endregion Relationship
 }

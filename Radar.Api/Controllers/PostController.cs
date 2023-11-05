@@ -7,11 +7,11 @@ namespace Radar.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PostsController : ControllerBase
+    public class PostController : ControllerBase
     {
         private readonly RadarContext _context;
 
-        public PostsController(RadarContext context)
+        public PostController(RadarContext context)
         {
             _context = context;
         }
@@ -19,24 +19,24 @@ namespace Radar.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPost()
         {
-            if (_context.Posts == null)
+            if (_context.Post == null)
             {
                 return NotFound();
             }
 
-            List<Post> posts = await _context.Posts.ToListAsync();
+            List<Post> posts = await _context.Post.ToListAsync();
             return Ok(posts.ToReadDto(_context));
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PostReadDto>> GetPost(int id)
         {
-            if (_context.Posts == null)
+            if (_context.Post == null)
             {
                 return NotFound();
             }
 
-            var post = await _context.Posts.FindAsync(id);
+            var post = await _context.Post.FindAsync(id);
 
             if (post == null)
             {
@@ -60,7 +60,7 @@ namespace Radar.Api.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateException)
             {
                 if (!PostExists(id))
                 {
@@ -78,24 +78,24 @@ namespace Radar.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Post>> PostPost(PostCreateDto post)
         {
-            if (_context.Posts == null)
+            if (_context.Post == null)
             {
                 return Problem("Entity set 'RadarContext.Post'  is null.");
             }
 
-            if (!_context.Pessoas.AnyAsync(pessoa => pessoa.PessoaId == post.PessoaId).Result)
+            if (!_context.Pessoa.AnyAsync(pessoa => pessoa.PessoaId == post.PessoaId).Result)
             {
                 return Problem("Entity set 'RadarContext.Pessoa' does not contain the specified key.");
             }
 
-            if (!_context.Locals.AnyAsync(local => local.LocalId == post.LocalId).Result)
+            if (!_context.Local.AnyAsync(local => local.LocalId == post.LocalId).Result)
             {
                 return Problem("Entity set 'RadarContext.Local' does not contain the specified key.");
             }
 
             post.PostId = GetNextId();
 
-            _context.Posts.Add(post.ToModel(_context));
+            _context.Post.Add(post.ToModel(_context));
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPost", new { id = post.PostId }, post);
@@ -104,17 +104,17 @@ namespace Radar.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(int id)
         {
-            if (_context.Posts == null)
+            if (_context.Post == null)
             {
                 return NotFound();
             }
-            var post = await _context.Posts.FindAsync(id);
+            var post = await _context.Post.FindAsync(id);
             if (post == null)
             {
                 return NotFound();
             }
 
-            _context.Posts.Remove(post);
+            _context.Post.Remove(post);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -123,12 +123,12 @@ namespace Radar.Api.Controllers
         [HttpGet("FromPessoa/{pessoaId}")]
         public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPostFromPessoa(int pessoaId)
         {
-            if (_context.Posts == null)
+            if (_context.Post == null)
             {
                 return NotFound();
             }
 
-            List<Post> posts = await _context.Posts.Where(post => post.PessoaId == pessoaId).ToListAsync();
+            List<Post> posts = await _context.Post.Where(post => post.PessoaId == pessoaId).ToListAsync();
 
             if (posts.Count == 0)
             {
@@ -140,12 +140,12 @@ namespace Radar.Api.Controllers
 
         private bool PostExists(int id)
         {
-            return (_context.Posts?.Any(e => e.PostId == id)).GetValueOrDefault();
+            return (_context.Post?.Any(e => e.PostId == id)).GetValueOrDefault();
         }
 
         private int GetNextId()
         {
-            return (_context.Posts?.Max(e => e.PostId) ?? 0) + 1;
+            return (_context.Post?.Max(e => e.PostId) ?? 0) + 1;
         }
     }
 }

@@ -14,11 +14,11 @@ namespace Radar.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class PessoasController : ControllerBase
+    public class PessoaController : ControllerBase
     {
         private readonly RadarContext _context;
 
-        public PessoasController(RadarContext context)
+        public PessoaController(RadarContext context)
         {
             _context = context;
         }
@@ -26,24 +26,24 @@ namespace Radar.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PessoaReadDto>>> GetPessoa()
         {
-            if (_context.Pessoas == null)
+            if (_context.Pessoa == null)
             {
                 return NotFound();
             }
 
-            List<Pessoa> pessoas = await _context.Pessoas.ToListAsync();
+            List<Pessoa> pessoas = await _context.Pessoa.ToListAsync();
             return Ok(pessoas.ToReadDto());
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PessoaReadDto>> GetPessoa(int id)
         {
-            if (_context.Pessoas == null)
+            if (_context.Pessoa == null)
             {
                 return NotFound();
             }
 
-            var pessoa = await _context.Pessoas.FindAsync(id);
+            var pessoa = await _context.Pessoa.FindAsync(id);
 
             if (pessoa == null)
             {
@@ -69,7 +69,7 @@ namespace Radar.Api.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateException)
             {
                 if (!PessoaExists(id))
                 {
@@ -87,7 +87,7 @@ namespace Radar.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Pessoa>> PostPessoa(PessoaCreateDto pessoa)
         {
-            if (_context.Pessoas == null)
+            if (_context.Pessoa == null)
             {
                 return Problem("Entity set 'RadarContext.Pessoa'  is null.");
             }
@@ -95,9 +95,23 @@ namespace Radar.Api.Controllers
             int newId = GetNextId();
 
             Dictionary<string, string> hmac = GetHmacFromPassword(pessoa.Senha);
+            _context.Pessoa.Add(pessoa.ToModel(newId, hmac["Hash"], hmac["Key"]));
 
-            _context.Pessoas.Add(pessoa.ToModel(newId, hmac["Hash"], hmac["Key"]));
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (PessoaExists(newId))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
             return CreatedAtAction("GetPessoa", new { id = newId }, pessoa);
         }
@@ -105,19 +119,19 @@ namespace Radar.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePessoa(int id)
         {
-            if (_context.Pessoas == null)
+            if (_context.Pessoa == null)
             {
                 return NotFound();
             }
 
-            Pessoa? pessoa = await _context.Pessoas.FindAsync(id);
+            Pessoa? pessoa = await _context.Pessoa.FindAsync(id);
 
             if (pessoa == null)
             {
                 return NotFound();
             }
 
-            _context.Pessoas.Remove(pessoa);
+            _context.Pessoa.Remove(pessoa);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -127,17 +141,17 @@ namespace Radar.Api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SignIn(PessoaLoginDto login)
         {
-            if (_context.Pessoas == null)
+            if (_context.Pessoa == null)
             {
                 return NotFound();
             }
 
-            if (!await _context.Pessoas.AnyAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))
+            if (!await _context.Pessoa.AnyAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))
             {
                 return base.NotFound();
             }
 
-            Pessoa pessoa = (await _context.Pessoas.FirstOrDefaultAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))!;
+            Pessoa pessoa = (await _context.Pessoa.FirstOrDefaultAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))!;
             if (!IsPasswordValid(login.Senha, pessoa.SenhaHash, pessoa.SenhaKey))
             {
                 return Unauthorized();
@@ -150,12 +164,12 @@ namespace Radar.Api.Controllers
 
         private bool PessoaExists(int id)
         {
-            return (_context.Pessoas?.Any(e => e.PessoaId == id)).GetValueOrDefault();
+            return (_context.Pessoa?.Any(e => e.PessoaId == id)).GetValueOrDefault();
         }
 
         private int GetNextId()
         {
-            return (_context.Pessoas?.Max(e => e.PessoaId) ?? 0) + 1;
+            return (_context.Pessoa?.Max(e => e.PessoaId) ?? 0) + 1;
         }
 
         private static Dictionary<string, string> GetHmacFromPassword(string password)

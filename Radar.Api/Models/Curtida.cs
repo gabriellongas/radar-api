@@ -3,7 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Radar.Api.Models;
 
-public class Curtidas
+[Table("Curtida")]
+public class Curtida
 {
     #region Column
     [Key]

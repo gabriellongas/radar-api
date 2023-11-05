@@ -136,8 +136,8 @@ namespace Radar.Api.Models.Dto
                 Avaliacao = postDto.Avaliacao,
                 DataPostagem = postDto.DataPostagem,
                 Likes = 0,
-                Local = context.Locals.Single(local => local.LocalId == postDto.LocalId),
-                Pessoa = context.Pessoas.Single(pessoa => pessoa.PessoaId == postDto.PessoaId)
+                Local = context.Local.Single(local => local.LocalId == postDto.LocalId),
+                Pessoa = context.Pessoa.Single(pessoa => pessoa.PessoaId == postDto.PessoaId)
             };
         }
         public static List<PostReadDto> ToReadDto(this List<Post> posts, RadarContext context)
@@ -149,8 +149,8 @@ namespace Radar.Api.Models.Dto
                 PostReadDto postReadDto = new()
                 {
                     PostId = post.PostId,
-                    Pessoa = context.Pessoas.Single(pessoa => pessoa.PessoaId == post.PessoaId),
-                    Local = context.Locals.Single(local => local.LocalId == post.PessoaId),
+                    Pessoa = context.Pessoa.Single(pessoa => pessoa.PessoaId == post.PessoaId),
+                    Local = context.Local.Single(local => local.LocalId == post.PessoaId),
                     Conteudo = post.Conteudo,
                     Avaliacao = post.Avaliacao,
                     DataPostagem = post.DataPostagem,
@@ -168,8 +168,8 @@ namespace Radar.Api.Models.Dto
             return new()
             {
                 PostId = post.PostId,
-                Pessoa = context.Pessoas.Single(pessoa => pessoa.PessoaId == post.PessoaId),
-                Local = context.Locals.Single(local => local.LocalId == post.PessoaId),
+                Pessoa = context.Pessoa.Single(pessoa => pessoa.PessoaId == post.PessoaId),
+                Local = context.Local.Single(local => local.LocalId == post.PessoaId),
                 Conteudo = post.Conteudo,
                 Avaliacao = post.Avaliacao,
                 DataPostagem = post.DataPostagem,

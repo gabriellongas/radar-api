@@ -3,7 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Radar.Api.Models;
 
-public class Seguidores
+[Table("Seguidores")]
+public class Seguidor
 {
     #region Column
     [Key]
