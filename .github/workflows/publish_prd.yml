@@ -39,13 +39,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: "Setup AppSettings"
-      - uses: actions/checkout@v2
-        run: rm appsettings.Staging.json
-          rm appsettings.Development.json
-          rm appsettings.json
-          mv appsettings.Production.json appsettings.json
-
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v2
         with:
