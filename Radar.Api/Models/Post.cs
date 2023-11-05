@@ -32,7 +32,7 @@ public class Post
     #region Relationship
     [InverseProperty("PostIdCurtidoNavigation")]
     [JsonIgnore]
-    public virtual ICollection<Curtidas> Curtidas { get; set; } = new List<Curtidas>();
+    public virtual ICollection<Curtida> Curtidas { get; set; } = new List<Curtida>();
 
     [ForeignKey("LocalId")]
     [InverseProperty("Posts")]
