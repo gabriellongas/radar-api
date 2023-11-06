@@ -20,20 +20,6 @@ namespace Radar.Api.Controllers
         }
 
         [HttpGet]
-        [Route("GetConnectionString")]
-        public String GetConnectionString()
-        {
-            try
-            {
-                return _configuration.GetValue<string>("ConnectionStrings:SqlConnection");
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-        }
-
-        [HttpGet]
         public async Task<ActionResult<IEnumerable<Curtida>>> GetCurtida()
         {
             if (_context.Curtida == null)
