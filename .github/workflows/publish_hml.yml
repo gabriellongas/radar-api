@@ -1,13 +1,13 @@
-name: Build and deploy RADAR API PRD
+name: Build and deploy RADAR API HML
 
 env:
-  AZURE_WEBAPP_NAME: apiradar    # set this to the name of your Azure Web App
+  AZURE_WEBAPP_NAME: apiradar-hml    # set this to the name of your Azure Web App
   AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
   DOTNET_VERSION: '6.0.x'                 # set this to the .NET Core version to use
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "stage" ]
   workflow_dispatch:
 
 permissions:
@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-  
+
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v2
         with:
@@ -65,5 +65,5 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPI_PRD_PUBLISH_PROFILE }}
+          publish-profile: ${{ secrets.AZURE_WEBAPI_HML_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
