@@ -85,6 +85,7 @@ namespace Radar.Api.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<Pessoa>> PostPessoa(PessoaCreateDto pessoa)
         {
             if (_context.Pessoa == null)

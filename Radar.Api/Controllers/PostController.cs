@@ -95,12 +95,11 @@ namespace Radar.Api.Controllers
                 return Problem("Entity set 'RadarContext.Local' does not contain the specified key.");
             }
 
-            post.PostId = GetNextId();
-
-            _context.Post.Add(post.ToModel(_context));
+            int newId = GetNextId();
+            _context.Post.Add(post.ToModel(newId, _context));
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPost", new { id = post.PostId }, post);
+            return CreatedAtAction("GetPost", new { id = newId }, post);
         }
 
         [HttpDelete("{id}")]
@@ -131,11 +130,6 @@ namespace Radar.Api.Controllers
             }
 
             List<Post> posts = await _context.Post.Where(post => post.PessoaId == pessoaId).ToListAsync();
-
-            if (posts.Count == 0)
-            {
-                return NotFound();
-            }
 
             return Ok(posts.ToReadDto(_context));
         }
