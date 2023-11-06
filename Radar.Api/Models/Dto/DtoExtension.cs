@@ -125,11 +125,11 @@ namespace Radar.Api.Models.Dto
         #endregion Pessoa
 
         #region Post
-        public static Post ToModel(this PostCreateDto postDto, RadarContext context)
+        public static Post ToModel(this PostCreateDto postDto, int newId, RadarContext context)
         {
             return new()
             {
-                PostId = postDto.PostId,
+                PostId = newId,
                 PessoaId = postDto.PessoaId,
                 LocalId = postDto.LocalId,
                 Conteudo = postDto.Conteudo,
@@ -150,7 +150,7 @@ namespace Radar.Api.Models.Dto
                 {
                     PostId = post.PostId,
                     Pessoa = context.Pessoa.Single(pessoa => pessoa.PessoaId == post.PessoaId),
-                    Local = context.Local.Single(local => local.LocalId == post.PessoaId),
+                    Local = context.Local.Single(local => local.LocalId == post.LocalId),
                     Conteudo = post.Conteudo,
                     Avaliacao = post.Avaliacao,
                     DataPostagem = post.DataPostagem,
