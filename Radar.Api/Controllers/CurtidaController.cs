@@ -11,10 +11,26 @@ namespace Radar.Api.Controllers
     public class CurtidaController : ControllerBase
     {
         private readonly RadarContext _context;
+        private readonly IConfiguration _configuration;
 
-        public CurtidaController(RadarContext context)
+        public CurtidaController(RadarContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
+        }
+
+        [HttpGet]
+        [Route("GetConnectionString")]
+        public String GetConnectionString()
+        {
+            try
+            {
+                return _configuration.GetValue<string>("ConnectionStrings:SqlConnection");
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
         [HttpGet]
