@@ -11,4 +11,5 @@ public class PostReadDto
     public int Avaliacao { get; set; }
     public DateTime DataPostagem { get; set; }
     public int Curtidas { get; set; }
+    public bool Curtiu { get; set; }
 }

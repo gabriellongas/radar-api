@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Radar.Api.Data;
-using Radar.Api.Models.Dto;
+﻿using Radar.Api.Data;
 
 namespace Radar.Api.Models.Dto
 {
@@ -140,7 +138,7 @@ namespace Radar.Api.Models.Dto
                 Pessoa = context.Pessoa.Single(pessoa => pessoa.PessoaId == postDto.PessoaId)
             };
         }
-        public static List<PostReadDto> ToReadDto(this List<Post> posts, RadarContext context)
+        public static List<PostReadDto> ToReadDto(this List<Post> posts, int currentUserId, RadarContext context)
         {
             List<PostReadDto> postReadDtos = new();
 
@@ -154,7 +152,8 @@ namespace Radar.Api.Models.Dto
                     Conteudo = post.Conteudo,
                     Avaliacao = post.Avaliacao,
                     DataPostagem = post.DataPostagem,
-                    Curtidas = context.Curtida.Count(curtida => curtida.PostIdCurtido == post.PostId)
+                    Curtidas = context.Curtida.Count(curtida => curtida.PostIdCurtido == post.PostId),
+                    Curtiu = context.Curtida.Any(curtida => curtida.PostIdCurtido == post.PostId && curtida.PessoaIdCurtindo == currentUserId)
                 };
 
                 postReadDtos.Add(postReadDto);
@@ -163,7 +162,7 @@ namespace Radar.Api.Models.Dto
             return postReadDtos;
         }
 
-        public static PostReadDto ToReadDto(this Post post, RadarContext context)
+        public static PostReadDto ToReadDto(this Post post, int currentUserId, RadarContext context)
         {
             return new()
             {
@@ -173,9 +172,22 @@ namespace Radar.Api.Models.Dto
                 Conteudo = post.Conteudo,
                 Avaliacao = post.Avaliacao,
                 DataPostagem = post.DataPostagem,
-                Curtidas = context.Curtida.Count(curtida => curtida.PostIdCurtido == post.PostId)
+                Curtidas = context.Curtida.Count(curtida => curtida.PostIdCurtido == post.PostId),
+                Curtiu = context.Curtida.Any(curtida => curtida.PostIdCurtido == post.PostId && curtida.PessoaIdCurtindo == currentUserId)
             };
         }
         #endregion Post
+
+        #region Curtida
+        public static Curtida ToModel(this CurtidaCreateDto curtida, int newId)
+        {
+            return new()
+            {
+                CurtidaId = newId,
+                PessoaIdCurtindo = curtida.PessoaIdCurtindo,
+                PostIdCurtido = curtida.PostIdCurtido
+            };
+        }
+        #endregion Curtida
     }
 }

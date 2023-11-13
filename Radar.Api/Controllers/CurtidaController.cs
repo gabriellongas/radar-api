@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Radar.Api.Data;
+using Radar.Api.Models.Dto;
 
 namespace Radar.Api.Controllers
 {
@@ -78,15 +79,15 @@ namespace Radar.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Curtida>> PostCurtida(Curtida curtida)
+        public async Task<ActionResult<CurtidaCreateDto>> PostCurtida(CurtidaCreateDto curtida)
         {
             if (_context.Curtida == null)
             {
                 return Problem("Entity set 'RadarContext.Curtida'  is null.");
             }
 
-            curtida.CurtidaId = GetNextId();
-            _context.Curtida.Add(curtida);
+            int newId = GetNextId();
+            _context.Curtida.Add(curtida.ToModel(newId));
 
             try
             {
@@ -94,7 +95,7 @@ namespace Radar.Api.Controllers
             }
             catch (DbUpdateException)
             {
-                if (CurtidaExists(curtida.CurtidaId))
+                if (CurtidaExists(newId))
                 {
                     return Conflict();
                 }
@@ -104,7 +105,7 @@ namespace Radar.Api.Controllers
                 }
             }
 
-            return CreatedAtAction("GetCurtida", new { id = curtida.CurtidaId }, curtida);
+            return CreatedAtAction("GetCurtida", new { id = newId }, curtida);
         }
 
         [HttpDelete("{id}")]
@@ -127,6 +128,26 @@ namespace Radar.Api.Controllers
             return NoContent();
         }
 
+        [HttpDelete("{pessoaId}/{postId}")]
+        public async Task<IActionResult> DeleteCurtida(int pessoaId, int postId)
+        {
+            if (_context.Curtida == null)
+            {
+                return NotFound();
+            }
+            Curtida? curtida = await _context.Curtida.SingleAsync(curtida => curtida.PessoaIdCurtindo == pessoaId && curtida.PostIdCurtido == postId);
+
+            if (curtida == null)
+            {
+                return NotFound();
+            }
+
+            _context.Curtida.Remove(curtida);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
         private bool CurtidaExists(int id)
         {
             return (_context.Curtida?.Any(e => e.CurtidaId == id)).GetValueOrDefault();
@@ -134,7 +155,7 @@ namespace Radar.Api.Controllers
 
         private int GetNextId()
         {
-            return (_context.Pessoa?.Max(e => e.PessoaId) ?? 0) + 1;
+            return (_context.Curtida?.Max(e => e.CurtidaId) ?? 0) + 1;
         }
     }
 }

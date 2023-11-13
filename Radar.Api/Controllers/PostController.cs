@@ -18,21 +18,31 @@ namespace Radar.Api.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPost()
+        [HttpGet("{currentUserId}")]
+        public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPost(int currentUserId)
         {
+            if (currentUserId <= 0)
+            {
+                return BadRequest();
+            }
+                    
             if (_context.Post == null)
             {
                 return NotFound();
             }
 
             List<Post> posts = await _context.Post.ToListAsync();
-            return Ok(posts.ToReadDto(_context));
+            return Ok(posts.ToReadDto(currentUserId, _context));
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<PostReadDto>> GetPost(int id)
+        [HttpGet("{currentUserId}/{id}")]
+        public async Task<ActionResult<PostReadDto>> GetPost(int currentUserId, int id)
         {
+            if (currentUserId <= 0)
+            {
+                return BadRequest();
+            }
+
             if (_context.Post == null)
             {
                 return NotFound();
@@ -45,7 +55,7 @@ namespace Radar.Api.Controllers
                 return NotFound();
             }
 
-            return Ok(post.ToReadDto(_context));
+            return Ok(post.ToReadDto(currentUserId, _context));
         }
 
         [HttpPut("{id}")]
@@ -121,9 +131,14 @@ namespace Radar.Api.Controllers
             return NoContent();
         }
 
-        [HttpGet("FromPessoa/{pessoaId}")]
-        public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPostFromPessoa(int pessoaId)
+        [HttpGet("FromPessoa/{currentUserId}/{pessoaId}")]
+        public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPostFromPessoa(int currentUserId, int pessoaId)
         {
+            if (currentUserId <= 0)
+            {
+                return BadRequest();
+            }
+
             if (_context.Post == null)
             {
                 return NotFound();
@@ -131,7 +146,7 @@ namespace Radar.Api.Controllers
 
             List<Post> posts = await _context.Post.Where(post => post.PessoaId == pessoaId).ToListAsync();
 
-            return Ok(posts.ToReadDto(_context));
+            return Ok(posts.ToReadDto(currentUserId, _context));
         }
 
         private bool PostExists(int id)
