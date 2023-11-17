@@ -170,7 +170,8 @@ namespace Radar.Api.Controllers
 
         private int GetNextId()
         {
-            return (_context.Pessoa?.Max(e => e.PessoaId) ?? 0) + 1;
+            if (!_context.Pessoa.Any()) return 1;
+            return _context.Pessoa.Max(e => e.PessoaId) + 1;
         }
 
         private static Dictionary<string, string> GetHmacFromPassword(string password)
@@ -185,9 +186,14 @@ namespace Radar.Api.Controllers
 
         private static bool IsPasswordValid(string password, string hmac512hash, string hmac512key)
         {
-            using HMACSHA512 hmac = new(Convert.FromBase64String(hmac512key));
+            byte[] keyBytes = Convert.FromBase64String(hmac512key);
+            using HMACSHA512 hmac = new(keyBytes);
 
-            return hmac512hash == Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(password)));
+            byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+            byte[] passwordHashBytes = hmac.ComputeHash(passwordBytes);
+            string passwordHash = Convert.ToBase64String(passwordHashBytes);
+            
+            return hmac512hash == passwordHash;
         }
 
         private string CreateToken(Pessoa login)

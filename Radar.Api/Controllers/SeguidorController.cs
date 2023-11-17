@@ -131,7 +131,8 @@ namespace Radar.Api.Controllers
 
         private int GetNextId()
         {
-            return (_context.Post?.Max(e => e.PostId) ?? 0) + 1;
+            if (!_context.Seguidor.Any()) return 1;
+            return _context.Seguidor.Max(e => e.SeguidorId) + 1;
         }
     }
 }
