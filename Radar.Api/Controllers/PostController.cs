@@ -149,6 +149,24 @@ namespace Radar.Api.Controllers
             return Ok(posts.ToReadDto(currentUserId, _context));
         }
 
+        [HttpGet("FromLocal/{currentUserId}/{localId}")]
+        public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPostFromLocal(int currentUserId, int localId)
+        {
+            if (currentUserId <= 0)
+            {
+                return BadRequest();
+            }
+
+            if (_context.Post == null)
+            {
+                return NotFound();
+            }
+
+            List<Post> posts = await _context.Post.Where(post => post.LocalId == localId).ToListAsync();
+
+            return Ok(posts.ToReadDto(currentUserId, _context));
+        }
+
         private bool PostExists(int id)
         {
             return (_context.Post?.Any(e => e.PostId == id)).GetValueOrDefault();
