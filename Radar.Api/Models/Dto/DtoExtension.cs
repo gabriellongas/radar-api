@@ -5,7 +5,18 @@ namespace Radar.Api.Models.Dto
     public static class DtoExtension
     {
         #region Local
-        public static Local ToModel(this LocalCreateDto localDto)
+        public static Local ToModel(this LocalCreateDto localDto, int newId)
+        {
+            return new()
+            {
+                LocalId = newId,
+                Nome = localDto.Nome,
+                Descricao = localDto.Descricao,
+                Endereco = localDto.Endereco,
+                Verificado = localDto.Verificado
+            };
+        }
+        public static Local ToModel(this LocalUpdateDto localDto)
         {
             return new()
             {

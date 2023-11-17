@@ -51,7 +51,7 @@ namespace Radar.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutLocal(int id, LocalCreateDto local)
+        public async Task<IActionResult> PutLocal(int id, LocalUpdateDto local)
         {
             if (id != local.LocalId)
             {
@@ -87,12 +87,12 @@ namespace Radar.Api.Controllers
                 return Problem("Entity set 'RadarContext.Local'  is null.");
             }
 
-            local.LocalId = GetNextId();
+            int newId = GetNextId();
 
-            _context.Local.Add(local.ToModel());
+            _context.Local.Add(local.ToModel(newId));
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetLocal", new { id = local.LocalId }, local);
+            return CreatedAtAction("GetLocal", new { id = newId }, local);
         }
 
         [HttpDelete("{id}")]
@@ -121,7 +121,8 @@ namespace Radar.Api.Controllers
 
         private int GetNextId()
         {
-            return (_context.Local?.Max(e => e.LocalId) ?? 0) + 1;
+            if (!_context.Local.Any()) return 1;
+            return _context.Local.Max(e => e.LocalId) + 1;
         }
     }
 }

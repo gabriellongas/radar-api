@@ -155,7 +155,8 @@ namespace Radar.Api.Controllers
 
         private int GetNextId()
         {
-            return (_context.Curtida?.Max(e => e.CurtidaId) ?? 0) + 1;
+            if (!_context.Curtida.Any()) return 1;
+            return _context.Curtida.Max(e => e.CurtidaId) + 1;
         }
     }
 }
