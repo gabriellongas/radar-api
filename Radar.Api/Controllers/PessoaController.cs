@@ -54,16 +54,26 @@ namespace Radar.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPessoa(int id, PessoaUpdateDto pessoa)
+        public async Task<IActionResult> PutPessoa(int id, PessoaUpdateDto pessoaDto)
         {
-            if (id != pessoa.PessoaId)
+            if (id != pessoaDto.PessoaId)
             {
                 return BadRequest();
             }
 
-            Dictionary<string, string> hmac = GetHmacFromPassword(pessoa.Senha);
+            Pessoa? pessoa = await _context.Pessoa.FindAsync(id);
 
-            _context.Entry(pessoa.ToModel(hmac["Hash"], hmac["Key"])).State = EntityState.Modified;
+            if (pessoa == null)
+            {
+                return NotFound();
+            }
+
+            pessoa.Nome = pessoaDto.Nome;
+            pessoa.Email = pessoaDto.Email;
+            pessoa.Login = pessoaDto.Login;
+            pessoa.Descricao = pessoaDto.Descricao;
+
+            _context.Entry(pessoa).State = EntityState.Modified;
 
             try
             {
@@ -149,7 +159,7 @@ namespace Radar.Api.Controllers
 
             if (!await _context.Pessoa.AnyAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))
             {
-                return base.NotFound();
+                return NotFound();
             }
 
             Pessoa pessoa = (await _context.Pessoa.FirstOrDefaultAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))!;
@@ -161,6 +171,66 @@ namespace Radar.Api.Controllers
             string token = CreateToken(pessoa);
 
             return Ok(token);
+        }
+
+        [HttpPost("ValidatePassword")]
+        public async Task<IActionResult> ValidatePassword(PessoaLoginDto login)
+        {
+            if (_context.Pessoa == null)
+            {
+                return NotFound();
+            }
+
+            if (!await _context.Pessoa.AnyAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))
+            {
+                return BadRequest();
+            }
+
+            Pessoa pessoa = (await _context.Pessoa.FirstOrDefaultAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))!;
+
+            bool isValid = IsPasswordValid(login.Senha, pessoa.SenhaHash, pessoa.SenhaKey);
+
+            return Ok(isValid);
+        }
+
+        [HttpPut("UpdatePassword")]
+        public async Task<IActionResult> UpdatePassword(UpdatePasswordDto updatePasswordDto)
+        {
+            if (_context.Pessoa == null)
+            {
+                return NotFound();
+            }
+
+            if (!await _context.Pessoa.AnyAsync(pessoa => pessoa.PessoaId == updatePasswordDto.PessoaId))
+            {
+                return BadRequest();
+            }
+
+            Pessoa pessoa = (await _context.Pessoa.FirstOrDefaultAsync(pessoa => pessoa.PessoaId == updatePasswordDto.PessoaId))!;
+
+            Dictionary<string, string> hmac = GetHmacFromPassword(updatePasswordDto.NewPassword);
+            pessoa.SenhaHash = hmac["Hash"];
+            pessoa.SenhaKey = hmac["Key"];
+
+            _context.Entry(pessoa).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+
+                return Ok();
+            }
+            catch (DbUpdateException)
+            {
+                if (!PessoaExists(updatePasswordDto.PessoaId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         private bool PessoaExists(int id)

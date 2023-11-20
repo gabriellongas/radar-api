@@ -78,21 +78,6 @@ namespace Radar.Api.Models.Dto
             };
         }
 
-        public static Pessoa ToModel(this PessoaUpdateDto pessoaDto, string hash, string key)
-        {
-            return new()
-            {
-                PessoaId = pessoaDto.PessoaId,
-                Nome = pessoaDto.Nome,
-                Email = pessoaDto.Email,
-                Login = pessoaDto.Login,
-                SenhaHash = hash,
-                SenhaKey = key,
-                Descricao = pessoaDto.Descricao,
-                DataNascimento = pessoaDto.DataNascimento
-            };
-        }
-
         public static PessoaReadDto ToReadDto(this Pessoa pessoa)
         {
             return new()
