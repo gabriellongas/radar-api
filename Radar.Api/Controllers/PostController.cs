@@ -109,7 +109,7 @@ namespace Radar.Api.Controllers
             _context.Post.Add(post.ToModel(newId, _context));
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPost", new { id = newId }, post);
+            return CreatedAtAction("PostPost", new { id = newId });
         }
 
         [HttpDelete("{id}")]
