@@ -211,6 +211,7 @@ namespace Radar.Api.Controllers
             }
             catch (Exception ex)
             {
+                System.IO.File.WriteAllText("error.txt", ex.ToString());
                 return Problem(ex.Message);
             }
         }
