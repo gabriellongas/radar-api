@@ -26,210 +26,266 @@ namespace Radar.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PessoaReadDto>>> GetPessoa()
         {
-            if (_context.Pessoa == null)
+            try
             {
-                return NotFound();
-            }
+                if (_context.Pessoa == null)
+                {
+                    return NotFound();
+                }
 
-            List<Pessoa> pessoas = await _context.Pessoa.ToListAsync();
-            return Ok(pessoas.ToReadDto());
+                List<Pessoa> pessoas = await _context.Pessoa.ToListAsync();
+                return Ok(pessoas.ToReadDto());
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PessoaReadDto>> GetPessoa(int id)
         {
-            if (_context.Pessoa == null)
+            try
             {
-                return NotFound();
+                if (_context.Pessoa == null)
+                {
+                    return NotFound();
+                }
+
+                var pessoa = await _context.Pessoa.FindAsync(id);
+
+                if (pessoa == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(pessoa.ToReadDto());
             }
-
-            var pessoa = await _context.Pessoa.FindAsync(id);
-
-            if (pessoa == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            return Ok(pessoa.ToReadDto());
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPessoa(int id, PessoaUpdateDto pessoaDto)
         {
-            if (id != pessoaDto.PessoaId)
-            {
-                return BadRequest();
-            }
-
-            Pessoa? pessoa = await _context.Pessoa.FindAsync(id);
-
-            if (pessoa == null)
-            {
-                return NotFound();
-            }
-
-            pessoa.Nome = pessoaDto.Nome;
-            pessoa.Email = pessoaDto.Email;
-            pessoa.Login = pessoaDto.Login;
-            pessoa.Descricao = pessoaDto.Descricao;
-
-            _context.Entry(pessoa).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (!PessoaExists(id))
+                if (id != pessoaDto.PessoaId)
+                {
+                    return BadRequest();
+                }
+
+                Pessoa? pessoa = await _context.Pessoa.FindAsync(id);
+
+                if (pessoa == null)
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return NoContent();
+                pessoa.Nome = pessoaDto.Nome;
+                pessoa.Email = pessoaDto.Email;
+                pessoa.Login = pessoaDto.Login;
+                pessoa.Descricao = pessoaDto.Descricao;
+
+                _context.Entry(pessoa).State = EntityState.Modified;
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    if (!PessoaExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpPost]
         [AllowAnonymous]
         public async Task<ActionResult<Pessoa>> PostPessoa(PessoaCreateDto pessoa)
         {
-            if (_context.Pessoa == null)
-            {
-                return Problem("Entity set 'RadarContext.Pessoa'  is null.");
-            }
-
-            int newId = GetNextId();
-
-            Dictionary<string, string> hmac = GetHmacFromPassword(pessoa.Senha);
-            _context.Pessoa.Add(pessoa.ToModel(newId, hmac["Hash"], hmac["Key"]));
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (PessoaExists(newId))
+                if (_context.Pessoa == null)
                 {
-                    return Conflict();
+                    return Problem("Entity set 'RadarContext.Pessoa'  is null.");
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return CreatedAtAction("GetPessoa", new { id = newId }, pessoa);
+                int newId = GetNextId();
+
+                Dictionary<string, string> hmac = GetHmacFromPassword(pessoa.Senha);
+                _context.Pessoa.Add(pessoa.ToModel(newId, hmac["Hash"], hmac["Key"]));
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    if (PessoaExists(newId))
+                    {
+                        return Conflict();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return CreatedAtAction("GetPessoa", new { id = newId }, pessoa);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePessoa(int id)
         {
-            if (_context.Pessoa == null)
+            try
             {
-                return NotFound();
+                if (_context.Pessoa == null)
+                {
+                    return NotFound();
+                }
+
+                Pessoa? pessoa = await _context.Pessoa.FindAsync(id);
+
+                if (pessoa == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Pessoa.Remove(pessoa);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            Pessoa? pessoa = await _context.Pessoa.FindAsync(id);
-
-            if (pessoa == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            _context.Pessoa.Remove(pessoa);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         [HttpPost("SignIn")]
         [AllowAnonymous]
         public async Task<IActionResult> SignIn(PessoaLoginDto login)
         {
-            if (_context.Pessoa == null)
+            try
             {
-                return NotFound();
-            }
+                if (_context.Pessoa == null)
+                {
+                    return NotFound();
+                }
 
-            if (!await _context.Pessoa.AnyAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))
+                if (!await _context.Pessoa.AnyAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))
+                {
+                    return NotFound();
+                }
+
+                Pessoa pessoa = (await _context.Pessoa.FirstOrDefaultAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))!;
+                if (!IsPasswordValid(login.Senha, pessoa.SenhaHash, pessoa.SenhaKey))
+                {
+                    return Unauthorized();
+                }
+
+                string token = CreateToken(pessoa);
+
+                return Ok(token);
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            Pessoa pessoa = (await _context.Pessoa.FirstOrDefaultAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))!;
-            if (!IsPasswordValid(login.Senha, pessoa.SenhaHash, pessoa.SenhaKey))
-            {
-                return Unauthorized();
-            }
-
-            string token = CreateToken(pessoa);
-
-            return Ok(token);
         }
 
         [HttpPost("ValidatePassword")]
         public async Task<IActionResult> ValidatePassword(PessoaLoginDto login)
         {
-            if (_context.Pessoa == null)
+            try
             {
-                return NotFound();
-            }
+                if (_context.Pessoa == null)
+                {
+                    return NotFound();
+                }
 
-            if (!await _context.Pessoa.AnyAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))
+                if (!await _context.Pessoa.AnyAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))
+                {
+                    return BadRequest();
+                }
+
+                Pessoa pessoa = (await _context.Pessoa.FirstOrDefaultAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))!;
+
+                bool isValid = IsPasswordValid(login.Senha, pessoa.SenhaHash, pessoa.SenhaKey);
+
+                return Ok(isValid);
+            }
+            catch (Exception ex)
             {
-                return BadRequest();
+                return Problem(ex.Message);
             }
-
-            Pessoa pessoa = (await _context.Pessoa.FirstOrDefaultAsync(pessoa => pessoa.Login == login.Login || pessoa.Email == login.Email))!;
-
-            bool isValid = IsPasswordValid(login.Senha, pessoa.SenhaHash, pessoa.SenhaKey);
-
-            return Ok(isValid);
         }
 
         [HttpPut("UpdatePassword")]
         public async Task<IActionResult> UpdatePassword(UpdatePasswordDto updatePasswordDto)
         {
-            if (_context.Pessoa == null)
-            {
-                return NotFound();
-            }
-
-            if (!await _context.Pessoa.AnyAsync(pessoa => pessoa.PessoaId == updatePasswordDto.PessoaId))
-            {
-                return BadRequest();
-            }
-
-            Pessoa pessoa = (await _context.Pessoa.FirstOrDefaultAsync(pessoa => pessoa.PessoaId == updatePasswordDto.PessoaId))!;
-
-            Dictionary<string, string> hmac = GetHmacFromPassword(updatePasswordDto.NewPassword);
-            pessoa.SenhaHash = hmac["Hash"];
-            pessoa.SenhaKey = hmac["Key"];
-
-            _context.Entry(pessoa).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-
-                return Ok();
-            }
-            catch (DbUpdateException)
-            {
-                if (!PessoaExists(updatePasswordDto.PessoaId))
+                if (_context.Pessoa == null)
                 {
                     return NotFound();
                 }
-                else
+
+                if (!await _context.Pessoa.AnyAsync(pessoa => pessoa.PessoaId == updatePasswordDto.PessoaId))
                 {
-                    throw;
+                    return BadRequest();
                 }
+
+                Pessoa pessoa = (await _context.Pessoa.FirstOrDefaultAsync(pessoa => pessoa.PessoaId == updatePasswordDto.PessoaId))!;
+
+                Dictionary<string, string> hmac = GetHmacFromPassword(updatePasswordDto.NewPassword);
+                pessoa.SenhaHash = hmac["Hash"];
+                pessoa.SenhaKey = hmac["Key"];
+
+                _context.Entry(pessoa).State = EntityState.Modified;
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                    return Ok();
+                }
+                catch (DbUpdateException)
+                {
+                    if (!PessoaExists(updatePasswordDto.PessoaId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
             }
         }
 

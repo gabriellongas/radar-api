@@ -23,129 +23,171 @@ namespace Radar.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Curtida>>> GetCurtida()
         {
-            if (_context.Curtida == null)
+            try
             {
-                return NotFound();
-            }
+                if (_context.Curtida == null)
+                {
+                    return NotFound();
+                }
 
-            IEnumerable<Curtida> curtidas = await _context.Curtida.ToListAsync();
-            return Ok(curtidas);
+                IEnumerable<Curtida> curtidas = await _context.Curtida.ToListAsync();
+                return Ok(curtidas);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Curtida>> GetCurtida(int id)
         {
-            if (_context.Curtida == null)
+            try
             {
-                return NotFound();
-            }
-            Curtida? curtida = await _context.Curtida.FindAsync(id);
+                if (_context.Curtida == null)
+                {
+                    return NotFound();
+                }
+                Curtida? curtida = await _context.Curtida.FindAsync(id);
 
-            if (curtida == null)
+                if (curtida == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(curtida);
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            return Ok(curtida);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCurtida(int id, Curtida curtida)
         {
-            if (id != curtida.CurtidaId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(curtida).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (!CurtidaExists(id))
+                if (id != curtida.CurtidaId)
                 {
-                    return NotFound();
+                    return BadRequest();
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return NoContent();
+                _context.Entry(curtida).State = EntityState.Modified;
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    if (!CurtidaExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult<CurtidaCreateDto>> PostCurtida(CurtidaCreateDto curtida)
         {
-            if (_context.Curtida == null)
-            {
-                return Problem("Entity set 'RadarContext.Curtida'  is null.");
-            }
-
-            int newId = GetNextId();
-            _context.Curtida.Add(curtida.ToModel(newId));
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (CurtidaExists(newId))
+                if (_context.Curtida == null)
                 {
-                    return Conflict();
+                    return Problem("Entity set 'RadarContext.Curtida'  is null.");
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return CreatedAtAction("GetCurtida", new { id = newId }, curtida);
+                int newId = GetNextId();
+                _context.Curtida.Add(curtida.ToModel(newId));
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    if (CurtidaExists(newId))
+                    {
+                        return Conflict();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return CreatedAtAction("GetCurtida", new { id = newId }, curtida);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCurtida(int id)
         {
-            if (_context.Curtida == null)
+            try
             {
-                return NotFound();
-            }
-            Curtida? curtida = await _context.Curtida.FindAsync(id);
+                if (_context.Curtida == null)
+                {
+                    return NotFound();
+                }
+                Curtida? curtida = await _context.Curtida.FindAsync(id);
 
-            if (curtida == null)
+                if (curtida == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Curtida.Remove(curtida);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            _context.Curtida.Remove(curtida);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         [HttpDelete("{pessoaId}/{postId}")]
         public async Task<IActionResult> DeleteCurtida(int pessoaId, int postId)
         {
-            if (_context.Curtida == null)
+            try
             {
-                return NotFound();
-            }
-            Curtida? curtida = await _context.Curtida.SingleAsync(curtida => curtida.PessoaIdCurtindo == pessoaId && curtida.PostIdCurtido == postId);
+                if (_context.Curtida == null)
+                {
+                    return NotFound();
+                }
+                Curtida? curtida = await _context.Curtida.SingleAsync(curtida => curtida.PessoaIdCurtindo == pessoaId && curtida.PostIdCurtido == postId);
 
-            if (curtida == null)
+                if (curtida == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Curtida.Remove(curtida);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            _context.Curtida.Remove(curtida);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         private bool CurtidaExists(int id)

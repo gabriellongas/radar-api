@@ -21,150 +21,199 @@ namespace Radar.Api.Controllers
         [HttpGet("{currentUserId}")]
         public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPost(int currentUserId)
         {
-            if (currentUserId <= 0)
+            try
             {
-                return BadRequest();
-            }
-                    
-            if (_context.Post == null)
-            {
-                return NotFound();
-            }
+                if (currentUserId <= 0)
+                {
+                    return BadRequest();
+                }
 
-            List<Post> posts = await _context.Post.ToListAsync();
-            return Ok(posts.ToReadDto(currentUserId, _context));
+                if (_context.Post == null)
+                {
+                    return NotFound();
+                }
+
+                List<Post> posts = await _context.Post.ToListAsync();
+                return Ok(posts.ToReadDto(currentUserId, _context));
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpGet("{currentUserId}/{id}")]
         public async Task<ActionResult<PostReadDto>> GetPost(int currentUserId, int id)
         {
-            if (currentUserId <= 0)
+            try
             {
-                return BadRequest();
-            }
+                if (currentUserId <= 0)
+                {
+                    return BadRequest();
+                }
 
-            if (_context.Post == null)
+                if (_context.Post == null)
+                {
+                    return NotFound();
+                }
+
+                var post = await _context.Post.FindAsync(id);
+
+                if (post == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(post.ToReadDto(currentUserId, _context));
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            var post = await _context.Post.FindAsync(id);
-
-            if (post == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(post.ToReadDto(currentUserId, _context));
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPost(int id, Post post)
         {
-            if (id != post.PostId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(post).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (!PostExists(id))
+                if (id != post.PostId)
                 {
-                    return NotFound();
+                    return BadRequest();
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return NoContent();
+                _context.Entry(post).State = EntityState.Modified;
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    if (!PostExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult<Post>> PostPost(PostCreateDto post)
         {
-            if (_context.Post == null)
+            try
             {
-                return Problem("Entity set 'RadarContext.Post'  is null.");
-            }
+                if (_context.Post == null)
+                {
+                    return Problem("Entity set 'RadarContext.Post'  is null.");
+                }
 
-            if (!_context.Pessoa.AnyAsync(pessoa => pessoa.PessoaId == post.PessoaId).Result)
+                if (!_context.Pessoa.AnyAsync(pessoa => pessoa.PessoaId == post.PessoaId).Result)
+                {
+                    return Problem("Entity set 'RadarContext.Pessoa' does not contain the specified key.");
+                }
+
+                if (!_context.Local.AnyAsync(local => local.LocalId == post.LocalId).Result)
+                {
+                    return Problem("Entity set 'RadarContext.Local' does not contain the specified key.");
+                }
+
+                int newId = GetNextId();
+                _context.Post.Add(post.ToModel(newId, _context));
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("PostPost", new { id = newId });
+            }
+            catch (Exception ex)
             {
-                return Problem("Entity set 'RadarContext.Pessoa' does not contain the specified key.");
+                return Problem(ex.Message);
             }
-
-            if (!_context.Local.AnyAsync(local => local.LocalId == post.LocalId).Result)
-            {
-                return Problem("Entity set 'RadarContext.Local' does not contain the specified key.");
-            }
-
-            int newId = GetNextId();
-            _context.Post.Add(post.ToModel(newId, _context));
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("PostPost", new { id = newId });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(int id)
         {
-            if (_context.Post == null)
+            try
             {
-                return NotFound();
+                if (_context.Post == null)
+                {
+                    return NotFound();
+                }
+                var post = await _context.Post.FindAsync(id);
+                if (post == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Post.Remove(post);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-            var post = await _context.Post.FindAsync(id);
-            if (post == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            _context.Post.Remove(post);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         [HttpGet("FromPessoa/{currentUserId}/{pessoaId}")]
         public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPostFromPessoa(int currentUserId, int pessoaId)
         {
-            if (currentUserId <= 0)
+            try
             {
-                return BadRequest();
-            }
+                if (currentUserId <= 0)
+                {
+                    return BadRequest();
+                }
 
-            if (_context.Post == null)
+                if (_context.Post == null)
+                {
+                    return NotFound();
+                }
+
+                List<Post> posts = await _context.Post.Where(post => post.PessoaId == pessoaId).ToListAsync();
+
+                return Ok(posts.ToReadDto(currentUserId, _context));
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            List<Post> posts = await _context.Post.Where(post => post.PessoaId == pessoaId).ToListAsync();
-
-            return Ok(posts.ToReadDto(currentUserId, _context));
         }
 
         [HttpGet("FromLocal/{currentUserId}/{localId}")]
         public async Task<ActionResult<IEnumerable<PostReadDto>>> GetPostFromLocal(int currentUserId, int localId)
         {
-            if (currentUserId <= 0)
+            try
             {
-                return BadRequest();
-            }
+                if (currentUserId <= 0)
+                {
+                    return BadRequest();
+                }
 
-            if (_context.Post == null)
+                if (_context.Post == null)
+                {
+                    return NotFound();
+                }
+
+                List<Post> posts = await _context.Post.Where(post => post.LocalId == localId).ToListAsync();
+
+                return Ok(posts.ToReadDto(currentUserId, _context));
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            List<Post> posts = await _context.Post.Where(post => post.LocalId == localId).ToListAsync();
-
-            return Ok(posts.ToReadDto(currentUserId, _context));
         }
 
         private bool PostExists(int id)
