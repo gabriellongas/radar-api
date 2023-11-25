@@ -42,28 +42,28 @@ jobs:
       - name: App Settings Variable Substitution - Connection String
         uses: microsoft/variable-substitution@v1
         with:
-          files: '${{env.DOTNET_ROOT}}\myapp\appsettings.Production.json'
+          files: '${{env.DOTNET_ROOT}}\myapp\appsettings.Staging.json'
         env:
-          ConnectionStrings.SqlConnection: ${{ secrets.CONNECTION_STRING_PRD }}
+          ConnectionStrings.SqlConnection: ${{ secrets.CONNECTION_STRING_HML }}
       
       - name: App Settings Variable Substitution - JWT Key
         uses: microsoft/variable-substitution@v1
         with:
-          files: '${{env.DOTNET_ROOT}}\myapp\appsettings.Production.json'
+          files: '${{env.DOTNET_ROOT}}\myapp\appsettings.Staging.json'
         env:
           Jwt.Key: ${{ secrets.JWT_KEY }}
       
       - name: App Settings Variable Substitution - JWT Issuer
         uses: microsoft/variable-substitution@v1
         with:
-          files: '${{env.DOTNET_ROOT}}\myapp\appsettings.Production.json'
+          files: '${{env.DOTNET_ROOT}}\myapp\appsettings.Staging.json'
         env:
           Jwt.Issuer: ${{ secrets.JWT_ISSUER }}
 
       - name: App Settings Variable Substitution - JWT Audience
         uses: microsoft/variable-substitution@v1
         with:
-          files: '${{env.DOTNET_ROOT}}\myapp\appsettings.Production.json'
+          files: '${{env.DOTNET_ROOT}}\myapp\appsettings.Staging.json'
         env:
           Jwt.Audience: ${{ secrets.JWT_AUDIENCE }}
 
