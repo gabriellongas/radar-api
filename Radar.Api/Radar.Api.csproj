@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="appsettings.Production.json" />
+    <Content Remove="appsettings.Staging.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="appsettings.Production.json" />
+    <None Include="appsettings.Staging.json" />
   </ItemGroup>
 
   <ItemGroup>
