@@ -37,6 +37,9 @@ jobs:
           files: '${{env.DOTNET_ROOT}}/myapp/appsettings.Staging.json'
         env:
           ConnectionStrings.SqlConnection: ${{ secrets.CONNECTION_STRING_HML }}
+          Jwt.Key: ${{ secrets.JWT_KEY }}
+          Jwt.Issuer: ${{ secrets.JWT_ISSUER }}
+          Jwt.Audience: ${{ secrets.JWT_AUDIENCE }}
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
