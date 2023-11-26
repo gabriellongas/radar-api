@@ -20,108 +20,143 @@ namespace Radar.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Seguidor>>> GetSeguidor()
         {
-            if (_context.Seguidor == null)
+            try
             {
-                return NotFound();
-            }
+                if (_context.Seguidor == null)
+                {
+                    return NotFound();
+                }
 
-            List<Seguidor> seguidor = await _context.Seguidor.ToListAsync();
-            return Ok(seguidor);
+                List<Seguidor> seguidor = await _context.Seguidor.ToListAsync();
+                return Ok(seguidor);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Seguidor>> GetSeguidor(int id)
         {
-            if (_context.Seguidor == null)
+            try
             {
-                return NotFound();
-            }
-            Seguidor? seguidor = await _context.Seguidor.FindAsync(id);
+                if (_context.Seguidor == null)
+                {
+                    return NotFound();
+                }
+                Seguidor? seguidor = await _context.Seguidor.FindAsync(id);
 
-            if (seguidor == null)
+                if (seguidor == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(seguidor);
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            return Ok(seguidor);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSeguidor(int id, Seguidor seguidor)
         {
-            if (id != seguidor.SeguidorId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(seguidor).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (!SeguidorExists(id))
+                if (id != seguidor.SeguidorId)
                 {
-                    return NotFound();
+                    return BadRequest();
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return NoContent();
+                _context.Entry(seguidor).State = EntityState.Modified;
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    if (!SeguidorExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult<Seguidor>> PostSeguidor(Seguidor seguidor)
         {
-            if (_context.Seguidor == null)
-            {
-                return Problem("Entity set 'RadarContext.Seguidores'  is null.");
-            }
-
-            seguidor.SeguidorId = GetNextId();
-            _context.Seguidor.Add(seguidor);
-            
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (SeguidorExists(seguidor.SeguidorId))
+                if (_context.Seguidor == null)
                 {
-                    return Conflict();
+                    return Problem("Entity set 'RadarContext.Seguidores'  is null.");
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return CreatedAtAction("GetSeguidor", new { id = seguidor.SeguidorId }, seguidor);
+                seguidor.SeguidorId = GetNextId();
+                _context.Seguidor.Add(seguidor);
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    if (SeguidorExists(seguidor.SeguidorId))
+                    {
+                        return Conflict();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return CreatedAtAction("GetSeguidor", new { id = seguidor.SeguidorId }, seguidor);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSeguidor(int id)
         {
-            if (_context.Seguidor == null)
+            try
             {
-                return NotFound();
+                if (_context.Seguidor == null)
+                {
+                    return NotFound();
+                }
+                Seguidor? seguidor = await _context.Seguidor.FindAsync(id);
+                if (seguidor == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Seguidor.Remove(seguidor);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-            Seguidor? seguidor = await _context.Seguidor.FindAsync(id);
-            if (seguidor == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            _context.Seguidor.Remove(seguidor);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         private bool SeguidorExists(int id)
@@ -131,7 +166,8 @@ namespace Radar.Api.Controllers
 
         private int GetNextId()
         {
-            return (_context.Post?.Max(e => e.PostId) ?? 0) + 1;
+            if (!_context.Seguidor.Any()) return 1;
+            return _context.Seguidor.Max(e => e.SeguidorId) + 1;
         }
     }
 }

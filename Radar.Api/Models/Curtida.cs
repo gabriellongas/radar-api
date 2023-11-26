@@ -19,11 +19,11 @@ public class Curtida
     #endregion Column
 
     #region Relationship
-    [ForeignKey("PessoaIdcurtindo")]
+    [ForeignKey("PessoaIdCurtindo")]
     [InverseProperty("Curtidas")]
     public virtual Pessoa PessoaIdCurtindoNavigation { get; set; } = null!;
 
-    [ForeignKey("PostIdcurtido")]
+    [ForeignKey("PostIdCurtido")]
     [InverseProperty("Curtidas")]
     public virtual Post PostIdCurtidoNavigation { get; set; } = null!;
     #endregion Relationship

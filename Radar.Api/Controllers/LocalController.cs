@@ -23,95 +23,130 @@ namespace Radar.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LocalReadDto>>> GetLocal()
         {
-            if (_context.Local == null)
+            try
             {
-                return NotFound();
-            }
+                if (_context.Local == null)
+                {
+                    return NotFound();
+                }
 
-            List<Local> locals = await _context.Local.ToListAsync();
-            return Ok(locals.ToReadDto());
+                List<Local> locals = await _context.Local.ToListAsync();
+                return Ok(locals.ToReadDto());
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<LocalReadDto>> GetLocal(int id)
         {
-            if (_context.Local == null)
-            {
-                return NotFound();
-            }
-
-            var local = await _context.Local.FindAsync(id);
-
-            if (local == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(local.ToReadDto());
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutLocal(int id, LocalCreateDto local)
-        {
-            if (id != local.LocalId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(local.ToModel()).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (!LocalExists(id))
+                if (_context.Local == null)
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return NoContent();
+                var local = await _context.Local.FindAsync(id);
+
+                if (local == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(local.ToReadDto());
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutLocal(int id, LocalUpdateDto local)
+        {
+            try
+            {
+                if (id != local.LocalId)
+                {
+                    return BadRequest();
+                }
+
+                _context.Entry(local.ToModel()).State = EntityState.Modified;
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    if (!LocalExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult<Local>> PostLocal(LocalCreateDto local)
         {
-            if (_context.Local == null)
+            try
             {
-                return Problem("Entity set 'RadarContext.Local'  is null.");
+                if (_context.Local == null)
+                {
+                    return Problem("Entity set 'RadarContext.Local'  is null.");
+                }
+
+                int newId = GetNextId();
+
+                _context.Local.Add(local.ToModel(newId));
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetLocal", new { id = newId }, local);
             }
-
-            local.LocalId = GetNextId();
-
-            _context.Local.Add(local.ToModel());
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetLocal", new { id = local.LocalId }, local);
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLocal(int id)
         {
-            if (_context.Local == null)
+            try
             {
-                return NotFound();
+                if (_context.Local == null)
+                {
+                    return NotFound();
+                }
+                var local = await _context.Local.FindAsync(id);
+                if (local == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Local.Remove(local);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-            var local = await _context.Local.FindAsync(id);
-            if (local == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(ex.Message);
             }
-
-            _context.Local.Remove(local);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
         private bool LocalExists(int id)
@@ -121,7 +156,8 @@ namespace Radar.Api.Controllers
 
         private int GetNextId()
         {
-            return (_context.Local?.Max(e => e.LocalId) ?? 0) + 1;
+            if (!_context.Local.Any()) return 1;
+            return _context.Local.Max(e => e.LocalId) + 1;
         }
     }
 }
