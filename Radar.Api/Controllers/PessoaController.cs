@@ -126,6 +126,11 @@ namespace Radar.Api.Controllers
                     return Problem("Entity set 'RadarContext.Pessoa'  is null.");
                 }
 
+                if (await _context.Pessoa.AnyAsync(p => p.Login == pessoa.Login || p.Email == pessoa.Email))
+                {
+                    return Conflict();
+                }
+
                 int newId = GetNextId();
 
                 Dictionary<string, string> hmac = GetHmacFromPassword(pessoa.Senha);
