@@ -34,7 +34,7 @@ jobs:
       - name: App Settings Variable Substitution - Connection String
         uses: microsoft/variable-substitution@v1
         with:
-          files: 'appsettings.Staging.json'
+          files: './Radar.Api/appsettings.Staging.json'
         env:
           ConnectionStrings.SqlConnection: ${{ secrets.CONNECTION_STRING_HML }}
 
