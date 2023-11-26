@@ -34,7 +34,7 @@ jobs:
       - name: App Settings Variable Substitution - Connection String
         uses: microsoft/variable-substitution@v1
         with:
-          files: './Radar.Api/appsettings.Staging.json'
+          files: '${{env.DOTNET_ROOT}}/myapp/appsettings.Staging.json'
         env:
           ConnectionStrings.SqlConnection: ${{ secrets.CONNECTION_STRING_HML }}
 
@@ -66,4 +66,3 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPI_HML_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-          enviroment-variables: 'ASPNETCORE_ENVIRONMENT=Staging'
