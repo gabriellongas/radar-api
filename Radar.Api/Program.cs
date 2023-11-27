@@ -30,6 +30,10 @@ try
         {
             builder.WithOrigins("https://radar-web-app-hml.azurewebsites.net").AllowAnyMethod().AllowAnyHeader();
         });
+        options.AddPolicy("AllowAll", builder =>
+        {
+            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        });
     });
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
@@ -48,7 +52,7 @@ try
 
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseCors("AllowWebApp");
+    app.UseCors("AllowAll");
     app.UseHttpsRedirection();
 
     app.UseAuthentication();
