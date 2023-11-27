@@ -4,6 +4,7 @@ Projeto API criado para atender o PBL (Project based Learning) do 8º Semestre d
 
 ## Ambientes
 - Homologação
-  - https://apiradar-hml.azurewebsites.net
+  - [radar-web-api.azurewebsites.net](https://radar-web-api.azurewebsites.net/)
 - Produção
-  - https://apiradar.azurewebsites.net 
+  - [radar-web-api-prod.azurewebsites.net](https://radar-web-api-prod.azurewebsites.net/)
+
